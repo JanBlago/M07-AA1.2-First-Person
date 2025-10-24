@@ -1,17 +1,24 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerMovementNew : MonoBehaviour
 {
-    public float speed = 5f;
+    [Header("Movement Settings")]
+    public float walkSpeed = 5f;
     public float jumpForce = 5f;
+    public float airControlMultiplier = 0.5f;
     public LayerMask groundLayer;
     public float groundCheckDistance = 0.1f;
+
+    [Header("Sprint Settings")]
+    public float sprintMultiplier = 2f;
 
     private Rigidbody rb;
     private PlayerInputActions inputActions;
     private Vector2 moveInput;
     private bool jumpPressed;
+    private bool isGrounded;
 
     void Awake()
     {
@@ -34,10 +41,11 @@ public class PlayerMovementNew : MonoBehaviour
 
     void Update()
     {
+        isGrounded = CheckGrounded();
         Move();
     }
 
-    bool IsGrounded()
+    bool CheckGrounded()
     {
         Vector3 origin = transform.position + Vector3.up * 0.1f;
         return Physics.Raycast(origin, Vector3.down, groundCheckDistance, groundLayer);
@@ -45,21 +53,44 @@ public class PlayerMovementNew : MonoBehaviour
 
     void Move()
     {
-        if (IsGrounded())
+        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
+        move.y = 0f;
+
+        if (move.magnitude < 0.1f) return;
+
+        float speedMultiplier = 1f;
+
+        // Velocidad seg�n direcci�n
+        if (moveInput.y < 0) speedMultiplier = 0.5f;                // Hacia atr�s
+        else if (Mathf.Abs(moveInput.x) > 0 && moveInput.y == 0) speedMultiplier = 0.75f; // Lados
+        else speedMultiplier = 1f;                                  // Adelante o diagonal adelante
+
+        // Sprint
+        if (isGrounded && Keyboard.current.leftShiftKey.isPressed)
         {
-            Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
-            move.y = 0f;
-
-            Vector3 velocity = move * speed;
-            velocity.y = rb.linearVelocity.y;
-            rb.linearVelocity = velocity;
-
-            if (jumpPressed)
-            {
-                rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
-                jumpPressed = false;
-            }
+            if (moveInput.y > 0) speedMultiplier *= sprintMultiplier; // Solo adelante o diagonal adelante
         }
+
+        // Aire
+        if (!isGrounded) speedMultiplier *= airControlMultiplier;
+
+        Vector3 velocity = move * walkSpeed * speedMultiplier;
+        velocity.y = rb.linearVelocity.y; // Mantener velocidad vertical
+        rb.linearVelocity = velocity;
+
+        // Salto
+        if (jumpPressed && isGrounded)
+        {
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
+            jumpPressed = false;
+        }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Vector3 origin = transform.position + Vector3.up * 0.1f;
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(origin, origin + Vector3.down * groundCheckDistance);
     }
 }
