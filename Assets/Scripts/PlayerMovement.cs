@@ -19,14 +19,16 @@ public class PlayerMovementNew : MonoBehaviour
     private Vector2 moveInput;
     private bool jumpPressed;
     private bool isGrounded;
+    private Animator animator;
 
-    void Awake()
+    private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
         inputActions = new PlayerInputActions();
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         inputActions.Enable();
         inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
@@ -34,15 +36,16 @@ public class PlayerMovementNew : MonoBehaviour
         inputActions.Player.Jump.performed += ctx => jumpPressed = true;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         inputActions.Disable();
     }
 
-    void Update()
+    private void Update()
     {
         isGrounded = CheckGrounded();
         Move();
+        UpdateAnimations();
     }
 
     bool CheckGrounded()
@@ -56,40 +59,54 @@ public class PlayerMovementNew : MonoBehaviour
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         move.y = 0f;
 
-        // Velocidad horizontal
         float speedMultiplier = 1f;
 
-        if (move.magnitude >= 0.1f) // Solo modificar speedMultiplier si hay input
+        if (move.magnitude >= 0.1f)
         {
-            // Velocidad según dirección
-            if (moveInput.y < 0) speedMultiplier = 0.5f;                     // Atrás
-            else if (Mathf.Abs(moveInput.x) > 0 && moveInput.y == 0) speedMultiplier = 0.75f; // Lados
-            else speedMultiplier = 1f;                                       // Adelante o diagonal
+            if (moveInput.y < 0) speedMultiplier = 0.5f; // Backwards
+            else if (Mathf.Abs(moveInput.x) > 0 && moveInput.y == 0) speedMultiplier = 0.75f; // Sideways
+            else speedMultiplier = 1f; // Forward / Diagonal
 
             // Sprint
             if (isGrounded && Keyboard.current.leftShiftKey.isPressed && moveInput.y > 0)
                 speedMultiplier *= sprintMultiplier;
         }
 
-        // Aire
-        if (!isGrounded) speedMultiplier *= airControlMultiplier;
+        if (!isGrounded)
+            speedMultiplier *= airControlMultiplier;
 
-        // Aplicar velocidad horizontal (mantener Y)
         Vector3 velocity = move * walkSpeed * speedMultiplier;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
 
-        // Salto
+        // Jump
         if (jumpPressed && isGrounded)
         {
-            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z); // Reinicia velocidad vertical
+            rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
             rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
-            jumpPressed = false;
         }
+
+        jumpPressed = false;
     }
 
+    // -----------------------------
+    //      ANIMACIONES BLENDTREE
+    // -----------------------------
+    void UpdateAnimations()
+    {
+     
+        animator.SetFloat("Forward", moveInput.y);
+        animator.SetBool("IsGrounded", isGrounded);
 
-    void OnDrawGizmosSelected()
+     
+        animator.SetFloat("Sideways", moveInput.x);
+
+       
+        bool isMoving = moveInput.sqrMagnitude > 0.05f;
+        animator.SetBool("Walking", isMoving);
+    }
+
+    private void OnDrawGizmosSelected()
     {
         Vector3 origin = transform.position + Vector3.up * 0.1f;
         Gizmos.color = Color.red;
