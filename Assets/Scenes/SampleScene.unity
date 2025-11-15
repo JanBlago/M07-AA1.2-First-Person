@@ -633,7 +633,6 @@ GameObject:
   - component: {fileID: 675815226}
   - component: {fileID: 675815224}
   - component: {fileID: 675815229}
-  - component: {fileID: 675815230}
   - component: {fileID: 675815231}
   m_Layer: 0
   m_Name: GameObject
@@ -743,28 +742,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!95 &675815230
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 675815223}
-  m_Enabled: 1
-  m_Avatar: {fileID: 9000000, guid: 14baeacd90e7bb348b990e86d6332b11, type: 3}
-  m_Controller: {fileID: 9100000, guid: 974b0ecb84801254f83ef7a37caf6af2, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &675815231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -780,7 +757,7 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  groundCheckDistance: 1
+  groundCheckDistance: 0.5
   jumpForce: 0.5
   jetpackForce: 1
   fuelMax: 1

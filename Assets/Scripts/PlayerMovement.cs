@@ -24,7 +24,8 @@ public class PlayerMovementNew : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>();
+        animator = GetComponentInChildren<Animator>();
+
         inputActions = new PlayerInputActions();
     }
 
