@@ -682,7 +682,7 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  groundCheckDistance: 1
+  groundCheckDistance: 2
   sprintMultiplier: 2
 --- !u!114 &675815227
 MonoBehaviour:
@@ -757,7 +757,7 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  groundCheckDistance: 0.5
+  groundCheckDistance: 2
   jumpForce: 0.5
   jetpackForce: 1
   fuelMax: 1
